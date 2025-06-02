@@ -1,5 +1,7 @@
 ## **Data & Model Versioning**
+
 ---
+
 - [**Data \& Model Versioning**](#data--model-versioning)
   - [**Versioning Data \& Models**](#versioning-data--models)
     - [**How Does Data \& Model Versioning Work?**](#how-does-data--model-versioning-work)
@@ -10,26 +12,28 @@
     - [**Data Access**](#data-access)
   - [**DVC commands in this document**](#dvc-commands-in-this-document)
 
-
 ### <ins>**Versioning Data & Models**</ins>
 
 We can make DVC track specific files or folders with the command **`dvc add ... -v`** where `-v` is for verbose mode and is optional.
 
 Sample command:
+
 ```
 dvc add [filename/directory] -v
 ```
 
 #### **How Does Data & Model Versioning Work?**
 
-DVC first checks whether it has already created a metafile for the file we added for tracking. If `md5: 'None'`, then it is not the case. DVC then saves the data to the DVC cache before removing the original file. A reflink is then created to the newly cached file so that the filesystem can find the cached file. Lastly, all relevant information is saved to the DVC metafile. 
+DVC first checks whether it has already created a metafile for the file we added for tracking. If `md5: 'None'`, then it is not the case. DVC then saves the data to the DVC cache before removing the original file. A reflink is then created to the newly cached file so that the filesystem can find the cached file. Lastly, all relevant information is saved to the DVC metafile.
 
 The metafile contains the MD5 hash for the file and the original file location. Sample metafile:
+
 ```
 outs:
 - md5: asdfgqwer
   path: data.xml
 ```
+
 In this case, whenever DVC is instructed to retrieve the `data.xml` in the `data` directory, it will retrieve the file with the hash `asdfgqwer`.
 
 Because the metafile is versioned by our Git history, DVC has tied data versions specific to code versions. A change to our dataset would constitute an updated DVC metafile and thus a new commit in our commit history.
@@ -80,11 +84,12 @@ dvc pull
 ```
 
 #### **Tracking Changes and Switching Versions**
+
 ---
 
-Use `dvc status` to check the status of the files tracked by DVC. A benefit of using DVC is that it adds a cache layer which makes it easy to switch between different versions of data without having to replace the entire dataset (e.g by downloading). 
+Use `dvc status` to check the status of the files tracked by DVC. A benefit of using DVC is that it adds a cache layer which makes it easy to switch between different versions of data without having to replace the entire dataset (e.g by downloading).
 
-Whenever we update an image dataset by adding more images, we will only retrieve the added images while keeping the older ones as they are. 
+Whenever we update an image dataset by adding more images, we will only retrieve the added images while keeping the older ones as they are.
 
 We can switch between versions with `dvc checkout`. First the required code is checked out and then the associated data. **The following is to be done in order:**
 
