@@ -1,15 +1,15 @@
 name: ClassifAI_Notebooks
 channels:
-    - pytorch
-    - nvidia
-    - conda-forge
-    - nodefaults
+  - pytorch
+  - nvidia
+  - conda-forge
+  - nodefaults
 dependencies:
-    - fastai
-    - python=3.10.10
-    - poetry
-    #- pycatch22
-    #- pytorch::pytorch
-    #- pytorch::torchaudio
-    #- pytorch::torchvision
-    #- pytorch::pytorch-cuda
+  - fastai
+  - python=3.10.10
+  - poetry
+  #- pycatch22
+  #- pytorch::pytorch
+  #- pytorch::torchaudio
+  #- pytorch::torchvision
+  #- pytorch::pytorch-cuda

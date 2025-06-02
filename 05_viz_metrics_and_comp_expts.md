@@ -1,5 +1,7 @@
 ## **Metrics Tracking and Experiments Comparison with DVC and Studio**
+
 ---
+
 - [**Metrics Tracking and Experiments Comparison with DVC and Studio**](#metrics-tracking-and-experiments-comparison-with-dvc-and-studio)
   - [**Metrics Tracking with DVC**](#metrics-tracking-with-dvc)
   - [**Exercise: Metrics Tracking**](#exercise-metrics-tracking)
@@ -9,26 +11,25 @@
   - [**DVC Studio Intro**](#dvc-studio-intro)
   - [**DVC commands in this document**](#dvc-commands-in-this-document)
 
-
 ### <ins>**Metrics Tracking with DVC**</ins>
 
 1. Define metrics in the `dvc.yaml` file. We can set specific files that contains metrics and plots for our experiments.
 
-    ```
-    stages:
-        train:
-            cmd: python train.py --config=params.yaml
-            deps:
-            - features.csv
-            outs:
-            - model.pkl
-            metrics:
-            - metrics.json:
-                cache: false
-            plots:
-            - auc.json:
-                cache: false
-    ```
+   ```
+   stages:
+       train:
+           cmd: python train.py --config=params.yaml
+           deps:
+           - features.csv
+           outs:
+           - model.pkl
+           metrics:
+           - metrics.json:
+               cache: false
+           plots:
+           - auc.json:
+               cache: false
+   ```
 
 Setting `cache: false`, we tell DVC not to track this file but instead keep this as a part of Git history. This decision is usually made depending on the size of the files.
 
@@ -65,10 +66,9 @@ DVC can generate a number of visuals, which are defined as templates in `.dvc/pl
 - `smooth`: linear plot with LOESS smoothing
 - `confusion`
 
+**`dvc plots show`**
 
-**``dvc plots show``**
-
- Say we have a metrics file called `logs.csv`.
+Say we have a metrics file called `logs.csv`.
 
 ```
 epoch, accuracy, loss, val_accuracy, val_loss
@@ -84,6 +84,7 @@ dvc plots show -y 'val_accuracy'
 ```
 
 For choosing a particular template:
+
 ```
 dvc plots show reports/confusion_matrix.csv --template confusion -x predicted -y y_true
 ```
@@ -91,6 +92,7 @@ dvc plots show reports/confusion_matrix.csv --template confusion -x predicted -y
 **`dvc plots diff`**
 
 To visually compare different experiments:
+
 ```
 dvc plots diff --targets logs.csv --x-label x
 ```
@@ -211,57 +213,57 @@ To register checkpoints, we use a library called `DVCLive`. It integrates with M
 
 1. Import library into training script and log the metrics.
 
-    ```
-    from dvclive import Live
+   ```
+   from dvclive import Live
 
-    live = Live("training_metrics) # Name of file where metrics are logged
+   live = Live("training_metrics) # Name of file where metrics are logged
 
-    for epoch in range(NUM_EPOCHS):
-        train_model(...)
-        metrics = evaluate_model(...)
+   for epoch in range(NUM_EPOCHS):
+       train_model(...)
+       metrics = evaluate_model(...)
 
-        # live.log() prevents json.dump()
+       # live.log() prevents json.dump()
 
-        for metric_name, value in metrics.items():
-            live.log(metric_name, value)
-        live.next_step()
-    ```
+       for metric_name, value in metrics.items():
+           live.log(metric_name, value)
+       live.next_step()
+   ```
 
 2. Specify the file containing the logged metrics in dvc pipeline.
 
-    ```
-    stages:
-        train:
-            cmd: python train.py
-            deps:
-            - train.py
-            outs:
-            - model.pt:
-                checkpoint: true
-            live:
-                results: # file name
-                    summary: true
-                    html: true
+   ```
+   stages:
+       train:
+           cmd: python train.py
+           deps:
+           - train.py
+           outs:
+           - model.pt:
+               checkpoint: true
+           live:
+               results: # file name
+                   summary: true
+                   html: true
 
-            # metrics and plots not required here
-    ```
+           # metrics and plots not required here
+   ```
 
 3. Visualize these metrics with `dvc plots`. An automatic HTML report can also be generated with `live.make_report()`
 
-    ```
-    from dvclive import Live
+   ```
+   from dvclive import Live
 
-    live = Live("training metrics) # Name of file where metrics are logged
+   live = Live("training metrics) # Name of file where metrics are logged
 
-    for epoch in range(NUM_EPOCHS):
-        train_model(...)
-        metrics = evaluate_model(...)
+   for epoch in range(NUM_EPOCHS):
+       train_model(...)
+       metrics = evaluate_model(...)
 
-        for metric_name, value in metrics.items():
-            live.log(metric_name, value)
-        live.make_report()
-        live.next_step()
-    ```
+       for metric_name, value in metrics.items():
+           live.log(metric_name, value)
+       live.make_report()
+       live.next_step()
+   ```
 
 DVCLive will generate a `report.html` in the same directory as metrics file, and this file will be updated at the end of each epoch.
 
