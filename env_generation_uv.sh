@@ -37,60 +37,74 @@ echo "Folder structure generation done."
 echo "################################################################"
 echo "Installing the necessary dependencies ..."
 echo ""
-uv add dvc dvclive fastai h5py ipykernel jupyter jupyter_contrib_nbextensions matplotlib numpy pandas pre-commit pylint pytest python-box pyyaml seaborn scikit-learn torch torcheval torchsummary torchvision tqdm types-PyYAML
+uv add dvc dvclive fastai h5py numpy plotly polars pyyaml scikit-learn torch torchsummary torcheval torchvision
+uv add --dev ipykernel jupyter jupyter_contrib_nbextensions pytest
 echo ""
 echo "Dependencies installation done."
 echo "################################################################"
 echo "Setting up pre-commit hooks ..."
 echo ""
 cat <<EOF > .pre-commit-config.yaml
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+  - post-checkout
+  - post-merge
+  - post-rewrite
 repos:
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
-    hooks:
-      - id: black
-        language_version: python3.10
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.16.0
-    hooks:
-      - id: mypy
-        args:
-          [
-            --disallow-untyped-defs,
-            --disallow-incomplete-defs,
-            --disallow-untyped-calls,
-            --ignore-missing-imports,
-          ]
-        additional_dependencies: [types-requests, types-PyYAML]
-  - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.15.0
-    hooks:
-      - id: reorder-python-imports
   - repo: https://github.com/iterative/dvc
-    rev: main
+    rev: 3.62.0
     hooks:
-      - id: dvc-pre-commit
-        additional_dependencies: [".[all]"]
-        language_version: python3
+    - id: dvc-pre-commit
+      additional_dependencies:
+      - .[all]
+      language_version: python3
+      stages:
+      - pre-commit
+    - id: dvc-pre-push
+      additional_dependencies:
+      - .[all]
+      language_version: python3
+      stages:
+      - pre-push
+    - id: dvc-post-checkout
+      additional_dependencies:
+      - .[all]
+      language_version: python3
+      stages:
+      - post-checkout
+      always_run: true
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.9
+    hooks:
+      - id: ruff-check
+        args: [ --fix ]
         stages:
-          - commit
-      - id: dvc-pre-push
-        additional_dependencies: [".[all]"]
-        language_version: python3
+          - pre-commit
+      - id: ruff-format
         stages:
-          - push
-      - id: dvc-post-checkout
-        additional_dependencies: [".[all]"]
-        language_version: python3
+            - pre-commit
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black"]
+        stages:
+          - pre-commit
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.12
+    hooks:
+      - id: uv-lock
+        stages:
+            - pre-commit
+      - id: uv-sync
         stages:
           - post-checkout
-        always_run: true
+          - post-merge
+          - post-rewrite
 EOF
-uvx pre-commit install --hook-type pre-push --hook-type post-checkout --hook-type pre-commit
+uvx pre-commit install
 echo ""
 echo "Pre-commit installed and initialized."
 echo "################################################################"
